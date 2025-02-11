@@ -7,10 +7,9 @@ class Point:
     self.imgY = imgY
 
 class Limb:
-  def __init__(self, base_joint, mid_joint, end_joint, end_point):
+  def __init__(self, base_joint, mid_joint, end_point):
     self.base_joint = base_joint
     self.mid_joint = mid_joint
-    self.end_joint = end_joint
     self.end_point = end_point
   
   def get_base_joint_angle(self):
@@ -18,10 +17,6 @@ class Limb:
     pass
 
   def get_mid_joint_angle(self):
-    # write code here
-    pass
-
-  def get_end_joint_angle(self):
     # write code here (use the end point to calculate the angle)
     pass
 

@@ -1,6 +1,5 @@
 from pose_tracker import PoseTracker
 import cv2
-import mediapipe as mp
 
 capture = cv2.VideoCapture(0)
 
