@@ -1,4 +1,4 @@
-from pose_tracker import PoseTracker
+from pose_tools import PoseTracker, PoseVisualizer
 import cv2
 
 capture = cv2.VideoCapture(0)
@@ -17,11 +17,19 @@ while True:
     print("Failed to receive data from camera feed. Exiting the program.")
     break
 
-  # Display the current frame image
-  cv2.imshow("Pose Tracking", frame)
+  # Resize the image
+  frame = cv2.resize(frame, (800, 800))
+
+  # Extract pose data from the current frame
+  image_landmarks, world_landmarks = PoseTracker.get_pose_from_image(frame)
+  processed_frame = PoseVisualizer.show_pose(frame, image_landmarks)
+
+  # Display the current frame image after it has been processed
+  cv2.imshow("Pose Tracking", processed_frame)
 
   # Exit the program if the Q key is pressed
   if cv2.waitKey(1) == ord("q"):
+    print("Q key was pressed, exiting the program.")
     break
 
 # Release the capture and close the window once the program is finished
