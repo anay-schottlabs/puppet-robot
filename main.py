@@ -1,4 +1,4 @@
-from pose_tools import PoseTracker, PoseVisualizer
+from pose_tools import PoseTracker, PoseVisualizer, PoseMath
 import cv2
 
 capture = cv2.VideoCapture(0)
@@ -23,6 +23,21 @@ while True:
   # Extract pose data from the current frame
   image_landmarks, world_landmarks = PoseTracker.get_pose_from_image(frame)
   processed_frame = PoseVisualizer.show_pose(frame, image_landmarks)
+
+  right_arm_angle = PoseMath.get_joint_angle(
+    world_landmarks.landmark[12],
+    world_landmarks.landmark[14]
+  )
+
+  processed_frame = cv2.putText(
+    processed_frame,
+    f"RIGHT SHOULDER: {right_arm_angle}",
+    (50, 50),
+    cv2.FONT_HERSHEY_SIMPLEX,
+    1,
+    (0, 0, 0),
+    2
+  )
 
   # Display the current frame image after it has been processed
   cv2.imshow("Pose Tracking", processed_frame)

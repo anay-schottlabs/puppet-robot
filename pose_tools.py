@@ -1,5 +1,6 @@
 import mediapipe as mp
 import cv2
+import math
 
 class PoseTracker:
   @staticmethod
@@ -26,3 +27,18 @@ class PoseVisualizer:
     mp_drawing.draw_landmarks(image_with_pose, pose_landmarks, mp_pose.POSE_CONNECTIONS)
 
     return image_with_pose
+
+class PoseMath:
+  @staticmethod
+  def get_relative_pos(start_point, end_point):
+    # Get the end point's position relative to the position of the start point
+    x = end_point.x - start_point.x
+    y = end_point.y - start_point.y
+    return x, y
+  
+  @staticmethod
+  def get_joint_angle(joint_point, end_point):
+    # Get the angle that the joint is rotated at
+    # This will be useful for figuring out the rotations that the servos will be mapped to
+    x, y = PoseMath.get_relative_pos(joint_point, end_point)
+    return math.degrees(math.atan2(y, x))
