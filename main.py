@@ -1,6 +1,8 @@
 from pose_tools import PoseTracker, PoseVisualizer, PoseMath
 import cv2
 
+SCREEN_DIMS = (800, 800)
+
 capture = cv2.VideoCapture(0)
 
 # Make sure that the capture didn't fail to open
@@ -18,12 +20,12 @@ while True:
     break
 
   # Resize the image
-  frame = cv2.resize(frame, (800, 800))
+  frame = cv2.resize(frame, SCREEN_DIMS)
 
   # Extract pose data from the current frame
   image_landmarks, world_landmarks = PoseTracker.get_pose_from_image(frame)
 
-  processed_frame = PoseVisualizer.show_pose(frame, image_landmarks, (800, 800))
+  processed_frame = PoseVisualizer.show_pose(frame, image_landmarks, world_landmarks, SCREEN_DIMS)
 
   # Display the current frame image after it has been processed
   cv2.imshow("Pose Tracking", processed_frame)
