@@ -9,7 +9,7 @@ class PoseTracker:
     image_rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
 
     # Extract pose data from the processed image
-    mp_pose = mp.solutions.pose.Pose(min_detection_confidence=0.5)
+    mp_pose = mp.solutions.pose.Pose(min_detection_confidence=0.75)
     pose_detection_result = mp_pose.process(image_rgb)
     image_landmarks = pose_detection_result.pose_landmarks
     world_landmarks = pose_detection_result.pose_world_landmarks
