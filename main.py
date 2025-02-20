@@ -27,6 +27,11 @@ while True:
 
   processed_frame = PoseVisualizer.show_pose(frame, image_landmarks, world_landmarks, SCREEN_DIMS)
 
+  if world_landmarks:
+    # This may seem weird (LEFT is mapped to Right, while RIGHT is mapped to Left) but they are inverted (for some reason)
+    text = f"LEFT: {PoseTracker.is_hand_grabbing(frame, 'Right')}, RIGHT: {PoseTracker.is_hand_grabbing(frame, 'Left')}"
+    processed_frame = cv2.putText(processed_frame, text, (50, 50), cv2.FONT_HERSHEY_PLAIN, 2, (0, 0, 0), 2)
+
   # Display the current frame image after it has been processed
   cv2.imshow("Pose Tracking", processed_frame)
 
