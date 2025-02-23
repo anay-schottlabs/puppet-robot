@@ -8,9 +8,16 @@ MAX_PULSE_MICROSECONDS = 2500
 # The input from the pose tracking is in the form of angles in degrees
 # We have to map these angles rotations of the servo, which are measured by their pulse width (in microseconds)
 def servo_degrees_to_pulse(degrees):
+  # Calculate the factor
   factor = degrees / MAX_SERVO_DEGREES
   pulse_range = MAX_PULSE_MICROSECONDS - MIN_PULSE_MICROSECONDS
   pulse = factor * pulse_range + MIN_PULSE_MICROSECONDS
+  # Clamp the pulse between the min and max values
+  if pulse < MIN_PULSE_MICROSECONDS:
+    return MIN_PULSE_MICROSECONDS
+  elif pulse > MAX_PULSE_MICROSECONDS:
+    return MAX_PULSE_MICROSECONDS
+  # The pulse was within the valid range so return it
   return pulse
 
 if __name__ == "__main__":
