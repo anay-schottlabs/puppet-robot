@@ -15,23 +15,25 @@ class Servo:
     self.channel = channel
 
 # Servo channels for right arm
-RIGHT_SHOULDER_FWD = Servo(max_degrees=180, channel=0)
-RIGHT_SHOULDER_LAT = Servo(max_degrees=180, channel=1)
+RIGHT_SHOULDER_FWD = Servo(max_degrees=360, channel=0)
+RIGHT_SHOULDER_LAT = Servo(max_degrees=360, channel=1)
 RIGHT_ELBOW_FWD = Servo(max_degrees=180, channel=2)
-RIGHT_SHOULDER_LAT = Servo(max_degrees=180, channel=3)
-RIGHT_CLAW = Servo(max_degrees=180, channel=4)
+RIGHT_ELBOW_LAT = Servo(max_degrees=180, channel=3)
+RIGHT_WRIST = Servo(max_degrees=180, channel=4)
+RIGHT_CLAW = Servo(max_degrees=180, channel=5)
 
 # Servo channels for left arm
-LEFT_SHOULDER_FWD = Servo(max_degrees=180, channel=5)
-LEFT_SHOULDER_LAT = Servo(max_degrees=180, channel=6)
-LEFT_ELBOW_FWD = Servo(max_degrees=180, channel=7)
-LEFT_ELBOW_LAT = Servo(max_degrees=180, channel=8)
-LEFT_CLAW = Servo(max_degrees=180, channel=9)
+LEFT_SHOULDER_FWD = Servo(max_degrees=360, channel=6)
+LEFT_SHOULDER_LAT = Servo(max_degrees=360, channel=7)
+LEFT_ELBOW_FWD = Servo(max_degrees=180, channel=8)
+LEFT_ELBOW_LAT = Servo(max_degrees=180, channel=9)
+LEFT_WRIST = Servo(max_degrees=180, channel=10)
+LEFT_CLAW = Servo(max_degrees=180, channel=11)
 
 # Servo channels for torso and head
-HEAD_FWD = Servo(max_degrees=180, channel=10)
-HEAD_LAT = Servo(max_degrees=180, channel=11)
-TORSO = Servo(max_degrees=180, channel=12)
+HEAD_FWD = Servo(max_degrees=180, channel=12)
+HEAD_LAT = Servo(max_degrees=180, channel=13)
+TORSO = Servo(max_degrees=360, channel=14)
 
 # The input from the pose tracking is in the form of angles in degrees
 # We have to map these angles rotations of the servo, which are measured by their pulse width (in microseconds)
