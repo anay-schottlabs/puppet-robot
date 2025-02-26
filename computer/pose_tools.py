@@ -117,3 +117,16 @@ class PoseMath:
     angleZY = round(math.degrees(math.atan2(y, z)))
 
     return angleXY, angleZY
+  
+  @staticmethod
+  def get_2d_landmark_distance(world_landmarks, landmark_index_1, landmark_index_2):
+    return math.dist(
+      [
+        world_landmarks.landmark[landmark_index_1].x,
+        world_landmarks.landmark[landmark_index_1].y
+      ],
+      [
+        world_landmarks.landmark[landmark_index_2].x,
+        world_landmarks.landmark[landmark_index_2].y
+      ]
+    )

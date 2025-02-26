@@ -4,6 +4,11 @@ import cv2
 if __name__ == "__main__":
   SCREEN_DIMS = (800, 800)
 
+  # This will be needed later for when we track the torso's rotation
+  # We'll leave this as zero for now, it will be set later
+  lower_torso_length = 0
+  is_first_frame = True
+
   capture = cv2.VideoCapture(0)
 
   # Make sure that the capture didn't fail to open
@@ -28,8 +33,13 @@ if __name__ == "__main__":
 
     processed_frame = PoseVisualizer.show_pose(frame, image_landmarks, world_landmarks, SCREEN_DIMS)
 
-    # Printing some messages on the screen for logging purposes
     if world_landmarks:
+      # Save the length of the lower part of the person's torso on the first frame where someone is detected
+      # We'll assume that the person started in a neutral position, facing the directly towards the camera
+      if is_first_frame:
+        lower_torso_length = PoseMath.get_2d_landmark_distance(world_landmarks, 23, 24)
+        is_first_frame = False
+      # Printing some messages on the screen for logging purposes
       # Checking if hands are closed or open
       # This may seem weird (LEFT is mapped to Right, while RIGHT is mapped to Left) but they are inverted (for some reason)
       left_hand = "closed" if PoseTracker.is_hand_grabbing(frame, 'Right') else "open"
