@@ -22,10 +22,7 @@ def on_message(client, userdata, message) -> None:
   print("Emulating pose on robot...\n")
   set_servos(servo_pose=ServoPose.from_sendable(message.payload))
 
-def on_subscribe(client, userdata, mid, reason_code_list, properties) -> None:
-  if reason_code_list[0].is_failure:
-    print("The broker rejected the attempt at subscribing to the topic.")
-    exit()
+def on_subscribe(client, userdata, mid, granted_qos) -> None:
   print(f"Subscribed to the topic '{TOPIC}'.")
 
 # Define the callbacks for certain events
