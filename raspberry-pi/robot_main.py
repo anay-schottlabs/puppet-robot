@@ -20,7 +20,7 @@ def on_connect(client, userdata, flags, rc) -> None:
 def on_message(client, userdata, message) -> None:
   print(f"Received Message: {message.payload}")
   print("Emulating pose on robot...\n")
-  set_servos(servo_pose=ServoPose.from_sendable(message.payload))
+  set_servos(servo_pose=ServoPose.from_sendable(message.payload.decode("utf-8")))
 
 def on_subscribe(client, userdata, mid, granted_qos) -> None:
   print(f"Subscribed to the topic '{TOPIC}'.")
