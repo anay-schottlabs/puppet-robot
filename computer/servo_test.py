@@ -18,8 +18,6 @@ except:
   print("Failed to connect to the broker. Exiting the program.")
   exit()
 
-client.publish(TOPIC, "The servo test program has connected.")
-
 print("Your inputs will control the robot's right arm servos.\n")
 
 # Each number represents an index in the list of servos
