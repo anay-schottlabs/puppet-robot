@@ -44,7 +44,7 @@ class ServoPose:
   # This converts the stringified data into a ServoPose object so that it can be read from
   @staticmethod
   def from_sendable(sendable: str) -> Self:
-    data = sendable.split(" ")
+    data = [ int(angle) for angle in sendable.split(" ") ]
     return ServoPose(*data)
 
 TOPIC = "robot/servos"
