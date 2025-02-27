@@ -46,3 +46,5 @@ class ServoPose:
   def from_sendable(sendable) -> Self:
     data = sendable.split(" ")
     return ServoPose(*data)
+
+TOPIC = "robot/servos"
