@@ -6,11 +6,11 @@ import sys
 sys.path.append('../puppet-robot')
 from servo_data_format import ServoPose, TOPIC
 
-client = mqtt.Client(mqtt.CallbackAPIVersion.VERSION2)
+client = mqtt.Client()
 
-def on_connect(client, userdata, flags, reason_code, properties) -> None:
+def on_connect(client, userdata, flags, rc) -> None:
   # Handle broker connection failure
-  if reason_code.is_failure:
+  if rc != 0:
     print("Failed to connect to the broker. Exiting the program.")
     exit()
   print("Connected to the broker.")
