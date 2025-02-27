@@ -1,9 +1,15 @@
 import paho.mqtt.client as mqtt
 import sys
+from dotenv import load_dotenv
+import os
 
 # Since the servo_data_format program is in the directory above, we have to append its path
 sys.path.append('../puppet-robot')
 from servo_data_format import ServoPose, TOPIC
+
+# Load the Raspberry Pi's IP address from the .env file
+load_dotenv()
+RASPBERRY_PI_IP_ADDRESS = os.getenv("RASPBERRY_PI_IP_ADDRESS")
 
 # This is a list of the servo values (angles in degrees)
 # They are all defaulted to zero at the start of the program
@@ -13,7 +19,7 @@ client = mqtt.Client(mqtt.CallbackAPIVersion.VERSION2)
 
 # Handle broker connection failure
 try:
-  client.connect("localhost", 1883, 63)
+  client.connect(RASPBERRY_PI_IP_ADDRESS, 1883, 63)
 except:
   print("Failed to connect to the broker. Exiting the program.")
   exit()
