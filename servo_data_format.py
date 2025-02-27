@@ -4,21 +4,21 @@ from typing import Self
 class ServoPose:
   def __init__(
       self,
-      right_shoulder_fwd,
-      right_shoulder_lat,
-      right_elbow_fwd,
-      right_elbow_lat,
-      right_wrist,
-      right_claw,
-      left_shoulder_fwd,
-      left_shoulder_lat,
-      left_elbow_fwd,
-      left_elbow_lat,
-      left_wrist,
-      left_claw,
-      head_fwd,
-      head_lat,
-      torso
+      right_shoulder_fwd: int,
+      right_shoulder_lat: int,
+      right_elbow_fwd: int,
+      right_elbow_lat: int,
+      right_wrist: int,
+      right_claw: int,
+      left_shoulder_fwd: int,
+      left_shoulder_lat: int,
+      left_elbow_fwd: int,
+      left_elbow_lat: int,
+      left_wrist: int,
+      left_claw: int,
+      head_fwd: int,
+      head_lat: int,
+      torso: int
   ):
     self.right_shoulder_fwd = right_shoulder_fwd
     self.right_shoulder_lat = right_shoulder_lat
@@ -43,7 +43,7 @@ class ServoPose:
   
   # This converts the stringified data into a ServoPose object so that it can be read from
   @staticmethod
-  def from_sendable(sendable) -> Self:
+  def from_sendable(sendable: str) -> Self:
     data = sendable.split(" ")
     return ServoPose(*data)
 
