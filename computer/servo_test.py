@@ -1,7 +1,6 @@
-import paho.mqtt.client as mqtt
-import sys
 from dotenv import load_dotenv
-import os
+from mqtt_publisher import MQTTPublisher
+import sys, os
 
 # Since the servo_data_format program is in the directory above, we have to append its path
 sys.path.append('../puppet-robot')
@@ -16,14 +15,8 @@ RASPBERRY_PI_IP_ADDRESS = os.getenv("RASPBERRY_PI_IP_ADDRESS")
 DEFAULT_SERVO_LIST = [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ]
 servo_list = DEFAULT_SERVO_LIST
 
-client = mqtt.Client(mqtt.CallbackAPIVersion.VERSION2)
-
-# Handle broker connection failure
-try:
-  client.connect(RASPBERRY_PI_IP_ADDRESS, 1883, 60)
-except:
-  print("Failed to connect to the broker. Exiting the program.")
-  exit()
+publisher = MQTTPublisher()
+publisher.connect(broker_ip=RASPBERRY_PI_IP_ADDRESS)
 
 print("Your inputs will control the robot's right arm servos.\n")
 
@@ -44,7 +37,7 @@ while True:
 
       # Exit the program if 'exit' is inputted
       if angle == "exit":
-        client.disconnect()
+        publisher.disconnect()
         exit()
       
       # Reset the value of all of the servos if 'zeros' is inputted
@@ -66,5 +59,5 @@ while True:
   
   # Convert the list of servos into a pose object and send it
   servo_pose = ServoPose(*servo_list)
-  client.publish(TOPIC, servo_pose.to_sendable())
+  publisher.publish_message(topic=TOPIC, message=servo_pose.to_sendable())
   print("\n")
