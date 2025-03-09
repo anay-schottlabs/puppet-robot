@@ -46,6 +46,22 @@ class PoseTracker:
             return True
           return False
     return True
+  
+  @staticmethod
+  def get_torso_rotation(world_landmarks):
+    # Here, Z is forward to backward, Y is up to down, and X is left to right
+    # We're looking at this from a top-down perspective, so the Z value will replace the Y value
+    left_hip = [
+      world_landmarks.landmark[23].x,
+      world_landmarks.landmark[23].z
+    ]
+    right_hip = [
+      world_landmarks.landmark[24].x,
+      world_landmarks.landmark[24].z
+    ]
+    x, y = PoseMath.get_relative_pos_2d(right_hip, left_hip)
+    # This calculates the actual angle, with 0 degrees representing the person facing left
+    return math.degrees(math.atan2(y, -x)) + 90
 
 class PoseVisualizer:
   @staticmethod
@@ -82,7 +98,7 @@ class PoseVisualizer:
 
 class PoseMath:
   @staticmethod
-  def get_relative_pos(start_point, end_point):
+  def get_relative_pos_3d(start_point, end_point):
     # Unpack the XYZ values from each of the points
     start_x, start_y, start_z = start_point
     end_x, end_y, end_z = end_point
@@ -91,6 +107,15 @@ class PoseMath:
     y = end_y - start_y
     z = end_z - start_z
     return -x, -y, -z
+  
+  def get_relative_pos_2d(start_point, end_point):
+    # Unpack the XY values from each of the points
+    start_x, start_y = start_point
+    end_x, end_y = end_point
+    # Get the end point's position relative to the position of the start point
+    x = end_x - start_x
+    y = end_y - start_y
+    return -x, -y
 
   @staticmethod
   def get_joint_angles(world_landmarks, landmark_index):
@@ -109,7 +134,7 @@ class PoseMath:
       world_landmarks.landmark[landmark_index + 2].z
     )
 
-    x, y, z = PoseMath.get_relative_pos(joint_point, end_point)
+    x, y, z = PoseMath.get_relative_pos_3d(joint_point, end_point)
 
     # Solve for the angle on the XY plane
     angleXY = round(math.degrees(math.atan2(y, x)))
@@ -117,16 +142,3 @@ class PoseMath:
     angleZY = round(math.degrees(math.atan2(y, z)))
 
     return angleXY, angleZY
-  
-  @staticmethod
-  def get_2d_landmark_distance(world_landmarks, landmark_index_1, landmark_index_2):
-    return math.dist(
-      [
-        world_landmarks.landmark[landmark_index_1].x,
-        world_landmarks.landmark[landmark_index_1].y
-      ],
-      [
-        world_landmarks.landmark[landmark_index_2].x,
-        world_landmarks.landmark[landmark_index_2].y
-      ]
-    )

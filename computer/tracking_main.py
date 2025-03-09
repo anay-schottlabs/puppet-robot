@@ -1,13 +1,8 @@
-from pose_tools import PoseTracker, PoseVisualizer, PoseMath
+from pose_tools import PoseTracker, PoseVisualizer
 import cv2
 
 if __name__ == "__main__":
   SCREEN_DIMS = (800, 800)
-
-  # This will be needed later for when we track the torso's rotation
-  # We'll leave this as zero for now, it will be set later
-  lower_torso_length = 0
-  is_first_frame = True
 
   capture = cv2.VideoCapture(0)
 
@@ -33,19 +28,21 @@ if __name__ == "__main__":
 
     processed_frame = PoseVisualizer.show_pose(frame, image_landmarks, world_landmarks, SCREEN_DIMS)
 
+    # Printing some messages on the screen for logging purposes
     if world_landmarks:
-      # Save the length of the lower part of the person's torso on the first frame where someone is detected
-      # We'll assume that the person started in a neutral position, facing the directly towards the camera
-      if is_first_frame:
-        lower_torso_length = PoseMath.get_2d_landmark_distance(world_landmarks, 23, 24)
-        is_first_frame = False
-      # Printing some messages on the screen for logging purposes
+      # A box so that we can see the text
+      processed_frame = cv2.rectangle(processed_frame, (0, 0), (SCREEN_DIMS[0], 100), (255, 255, 255), -1)
+
       # Checking if hands are closed or open
       # This may seem weird (LEFT is mapped to Right, while RIGHT is mapped to Left) but they are inverted (for some reason)
       left_hand = "closed" if PoseTracker.is_hand_grabbing(frame, 'Right') else "open"
       right_hand = "closed" if PoseTracker.is_hand_grabbing(frame, 'Left') else "open"
       text = f"LEFT HAND: {left_hand}, RIGHT HAND: {right_hand}"
       processed_frame = cv2.putText(processed_frame, text, (50, 50), cv2.FONT_HERSHEY_PLAIN, 2, (0, 0, 0), 2)
+
+      # Finding the torso rotation
+      text = f"TORSO: {PoseTracker.get_torso_rotation(world_landmarks=world_landmarks)}"
+      processed_frame = cv2.putText(processed_frame, text, (50, 100), cv2.FONT_HERSHEY_PLAIN, 2, (0, 0, 0), 2)
 
     # Display the current frame image after it has been processed
     cv2.imshow("Pose Tracking", processed_frame)
