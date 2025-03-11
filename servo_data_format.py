@@ -2,6 +2,9 @@ from typing import Self
 
 # This class serves as an outline for transmitting servo data between the computer and the Raspberry Pi
 class ServoPose:
+  CLAW_OPEN_DEGREES = 180
+  CLAW_CLOSE_DEGREES = 0
+
   def __init__(
       self,
       right_shoulder_fwd: int,

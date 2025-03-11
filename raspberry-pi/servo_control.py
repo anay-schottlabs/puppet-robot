@@ -10,10 +10,6 @@ MIN_PULSE = 500
 MAX_PULSE = 2500
 BUFFER_PULSE = 50
 
-# Values for controlling the claw at the end of each arm
-CLAW_OPEN_PULSE = 2500 - BUFFER_PULSE
-CLAW_CLOSE_PULSE = 500 + BUFFER_PULSE
-
 class Servo:
   def __init__(self, max_degrees: int, channel: int):
     self.max_degrees = max_degrees
