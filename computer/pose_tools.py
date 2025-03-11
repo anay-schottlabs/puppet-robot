@@ -61,7 +61,7 @@ class PoseTracker:
     ]
     x, y = PoseMath.get_relative_pos_2d(right_hip, left_hip)
     # This calculates the actual angle, with 0 degrees representing the person facing left
-    return math.degrees(math.atan2(y, -x)) + 90
+    return round(math.degrees(math.atan2(y, -x)) + 90)
 
 class PoseVisualizer:
   @staticmethod
