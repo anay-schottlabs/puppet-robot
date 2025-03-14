@@ -30,19 +30,39 @@ class Servo {
 Servo servo1 = Servo(0, 180);
 
 void setup() {
-  Serial.begin(9600);
-  pwm.begin();
-  pwm.setOscillatorFrequency(27000000);
-  pwm.setPWMFreq(Servo::SERVO_FREQ);
+  Serial.begin(115200);
+  // pwm.begin();
+  // pwm.setOscillatorFrequency(27000000);
+  // pwm.setPWMFreq(Servo::SERVO_FREQ);
 
   delay(10);
+
+  // servo1.setServoDegrees(0);
+  pinMode(13, OUTPUT);
+  digitalWrite(13, LOW);
 }
 
 void loop() {
-  servo1.setServoDegrees(0);
-  delay(2000);
-  servo1.setServoDegrees(90);
-  delay(2000);
-  servo1.setServoDegrees(180);
-  delay(2000);
+  while (!Serial.available());
+
+  int jointAngles[15] = {};
+
+  String message = Serial.readString();
+  int lastDelimIndex = 0;
+
+  for (int i = 0; i < 15; i++) {
+    if (i != 14) {
+      int substringEnd = message.indexOf(" ", lastDelimIndex + 1);
+      jointAngles[i] = message.substring(lastDelimIndex, substringEnd).toInt();
+      lastDelimIndex = substringEnd;
+    }
+    else jointAngles[i] = message.substring(lastDelimIndex).toInt();
+  }
+
+  if (jointAngles[0] == 180) {
+    digitalWrite(13, HIGH);
+  }
+  else if (jointAngles[0] == 0) {
+    digitalWrite(13, LOW);
+  }
 }
