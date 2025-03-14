@@ -1,12 +1,14 @@
 import paho.mqtt.client as mqtt
-from servo_control import set_servos
+from serial import Serial
 import sys
 
 # Since the servo_data_format program is in the directory above, we have to append its path
 sys.path.append('../puppet-robot')
-from servo_data_format import ServoPose, TOPIC
+from servo_data_format import TOPIC
 
 client = mqtt.Client()
+
+arduino = Serial("COM4", 115200)
 
 def on_connect(client, userdata, flags, rc) -> None:
   # Handle broker connection failure
@@ -18,9 +20,11 @@ def on_connect(client, userdata, flags, rc) -> None:
 
 # When the message is received, emulate the servo angles on the robot
 def on_message(client, userdata, message) -> None:
+  # Log the contents of the message
   print(f"Received Message: {message.payload}")
   print("Emulating pose on robot...\n")
-  set_servos(servo_pose=ServoPose.from_sendable(message.payload.decode("utf-8")))
+  # Send the message to the arduino
+  arduino.write(bytes(message.payload, "utf-8"))
 
 def on_subscribe(client, userdata, mid, granted_qos) -> None:
   print(f"Subscribed to the topic '{TOPIC}'.")
