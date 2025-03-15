@@ -27,7 +27,21 @@ class Servo {
     const static int PULSE_MAX = 2400;
 };
 
-Servo servo1 = Servo(0, 180);
+const Servo RIGHT_SHOULDER_FWD = Servo(0, 360);
+const Servo RIGHT_SHOULDER_LAT = Servo(1, 360);
+const Servo RIGHT_ELBOW_FWD = Servo(2, 180);
+const Servo RIGHT_ELBOW_LAT = Servo(3, 180);
+const Servo RIGHT_WRIST = Servo(4, 180);
+const Servo RIGHT_CLAW = Servo(5, 180);
+const Servo LEFT_SHOULDER_FWD = Servo(6, 360);
+const Servo LEFT_SHOULDER_LAT = Servo(7, 360);
+const Servo LEFT_ELBOW_FWD = Servo(8, 180);
+const Servo LEFT_ELBOW_LAT = Servo(9, 180);
+const Servo LEFT_WRIST = Servo(10, 180);
+const Servo LEFT_CLAW = Servo(11, 180);
+const Servo HEAD_FWD = Servo(12, 180);
+const Servo HEAD_LAT = Servo(13, 180);
+const Servo TORSO = Servo(14, 360);
 
 void setup() {
   Serial.begin(115200);
@@ -59,10 +73,10 @@ void loop() {
     else jointAngles[i] = message.substring(lastDelimIndex).toInt();
   }
 
-  if (jointAngles[0] == 180) {
+  if (jointAngles[RIGHT_SHOULDER_FWD] == 180) {
     digitalWrite(13, HIGH);
   }
-  else if (jointAngles[0] == 0) {
+  else if (jointAngles[RIGHT_SHOULDER_FWD] == 0) {
     digitalWrite(13, LOW);
   }
 }
