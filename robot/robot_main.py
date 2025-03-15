@@ -8,7 +8,7 @@ from servo_data_format import TOPIC
 
 client = mqtt.Client()
 
-arduino = Serial("COM4", 115200)
+arduino = Serial("/dev/tty/AMA0", 115200)
 
 def on_connect(client, userdata, flags, rc) -> None:
   # Handle broker connection failure
@@ -24,7 +24,7 @@ def on_message(client, userdata, message) -> None:
   print(f"Received Message: {message.payload}")
   print("Emulating pose on robot...\n")
   # Send the message to the arduino
-  arduino.write(bytes(message.payload, "utf-8"))
+  arduino.write(message.payload)
 
 def on_subscribe(client, userdata, mid, granted_qos) -> None:
   print(f"Subscribed to the topic '{TOPIC}'.")
