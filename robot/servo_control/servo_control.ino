@@ -27,37 +27,41 @@ class Servo {
     const static int PULSE_MAX = 2400;
 };
 
-const Servo RIGHT_SHOULDER_FWD = Servo(0, 360);
-const Servo RIGHT_SHOULDER_LAT = Servo(1, 360);
-const Servo RIGHT_ELBOW_FWD = Servo(2, 180);
-const Servo RIGHT_ELBOW_LAT = Servo(3, 180);
-const Servo RIGHT_WRIST = Servo(4, 180);
-const Servo RIGHT_CLAW = Servo(5, 180);
-const Servo LEFT_SHOULDER_FWD = Servo(6, 360);
-const Servo LEFT_SHOULDER_LAT = Servo(7, 360);
-const Servo LEFT_ELBOW_FWD = Servo(8, 180);
-const Servo LEFT_ELBOW_LAT = Servo(9, 180);
-const Servo LEFT_WRIST = Servo(10, 180);
-const Servo LEFT_CLAW = Servo(11, 180);
-const Servo HEAD_FWD = Servo(12, 180);
-const Servo HEAD_LAT = Servo(13, 180);
-const Servo TORSO = Servo(14, 360);
+const Servo SERVOS[] = {
+  Servo(0, 360), // RIGHT_SHOULDER_FWD
+  Servo(1, 360), // RIGHT_SHOULDER_LAT
+  Servo(2, 180), // RIGHT_ELBOW_FWD
+  Servo(3, 180), // RIGHT_ELBOW_LAT
+  Servo(4, 180), // RIGHT_WRIST
+  Servo(5, 180), // RIGHT_CLAW
+  Servo(6, 360), // LEFT_SHOULDER_FWD
+  Servo(7, 360), // LEFT_SHOULDER_LAT
+  Servo(8, 180), // LEFT_ELBOW_FWD
+  Servo(9, 180), // LEFT_ELBOW_LAT
+  Servo(10, 180), // LEFT_WRIST
+  Servo(11, 180), // LEFT_CLAW
+  Servo(12, 180), // HEAD_FWD
+  Servo(13, 180), // HEAD_LAT
+  Servo(14, 360) // TORSO
+};
 
 void setup() {
   Serial.begin(115200);
-  // pwm.begin();
-  // pwm.setOscillatorFrequency(27000000);
-  // pwm.setPWMFreq(Servo::SERVO_FREQ);
+  pwm.begin();
+  pwm.setOscillatorFrequency(27000000);
+  pwm.setPWMFreq(Servo::SERVO_FREQ);
 
   delay(10);
 
-  // servo1.setServoDegrees(0);
   pinMode(13, OUTPUT);
-  digitalWrite(13, LOW);
 }
 
 void loop() {
-  while (!Serial.available());
+  // Turn the LED off if we don't have a signal, keep it on if we do
+  while (!Serial.available()) {
+    digitalWrite(13, LOW);
+  }
+  digitalWrite(13, HIGH);
 
   int jointAngles[15] = {};
 
@@ -73,10 +77,7 @@ void loop() {
     else jointAngles[i] = message.substring(lastDelimIndex).toInt();
   }
 
-  if (jointAngles[RIGHT_SHOULDER_FWD] == 180) {
-    digitalWrite(13, HIGH);
-  }
-  else if (jointAngles[RIGHT_SHOULDER_FWD] == 0) {
-    digitalWrite(13, LOW);
+  for (Servo servo : SERVOS) {
+    servo.setServoDegrees(jointAngles[servo.channel]);
   }
 }
