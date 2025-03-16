@@ -64,7 +64,7 @@ if __name__ == "__main__":
     # Extract pose data from the current frame
     image_landmarks, world_landmarks = PoseTracker.get_pose_from_image(frame)
 
-    processed_frame = PoseVisualizer.show_pose(frame, image_landmarks, world_landmarks, SCREEN_DIMS)
+    processed_frame = PoseVisualizer.show_pose(frame, image_landmarks)
 
     if world_landmarks:
       # Have to make sure that the lock is not acquired
@@ -76,16 +76,29 @@ if __name__ == "__main__":
         servo_pose.torso = PoseTracker.get_torso_rotation(world_landmarks=world_landmarks)
 
         # Head
-        head_fwd, head_lat = PoseTracker.get_head_rotation(world_landmarks=world_landmarks, torso_rotation=servo_pose.torso)
-        servo_pose.head_fwd = head_fwd
-        servo_pose.head_lat = head_lat
+        servo_pose.head_fwd, servo_pose.head_lat = PoseTracker.get_head_rotation(
+          world_landmarks=world_landmarks,
+          torso_rotation=servo_pose.torso
+        )
 
         # Shoulders
-        right_shoulder_fwd = PoseTracker.get_arm_joint_rotations(world_landmarks=world_landmarks, landmark_index=12, is_y_first=False)
-        servo_pose.right_shoulder_fwd = right_shoulder_fwd
+        servo_pose.right_shoulder_fwd, servo_pose.right_shoulder_lat = PoseTracker.get_arm_joint_rotations(
+          world_landmarks=world_landmarks,
+          landmark_index=12,
+          forward_signs=(1, 1, 1),
+          lateral_signs=(1, -1, 1),
+          fwd_y_first=False,
+          lat_y_first=False
+        )
 
-        left_shoulder_fwd = PoseTracker.get_arm_joint_rotations(world_landmarks=world_landmarks, landmark_index=11, y_sign=-1, z_sign=-1)
-        servo_pose.left_shoulder_fwd = left_shoulder_fwd
+        servo_pose.left_shoulder_fwd, servo_pose.left_shoulder_lat = PoseTracker.get_arm_joint_rotations(
+          world_landmarks=world_landmarks,
+          landmark_index=11,
+          forward_signs=(1, -1, -1),
+          lateral_signs=(-1, -1, 1),
+          fwd_y_first=True,
+          lat_y_first=False
+        )
         
         # Hands
         # This may seem weird (left is mapped to right, while right is mapped to left), but the handedness values seem to be inverted as of my testing

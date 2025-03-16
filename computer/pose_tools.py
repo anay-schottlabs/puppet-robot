@@ -89,7 +89,7 @@ class PoseTracker:
     return forward, lateral
   
   @staticmethod
-  def get_arm_joint_rotations(world_landmarks, landmark_index, y_sign=1, z_sign=1, is_y_first=True):
+  def get_arm_joint_rotations(world_landmarks, landmark_index, forward_signs, lateral_signs, fwd_y_first, lat_y_first):
     # This method gets the angles that a joint is rotated at
     # There are two angles because the shoulder and elbow can rotate along two different axes
 
@@ -108,27 +108,39 @@ class PoseTracker:
     x, y, z = PoseMath.get_relative_pos_3d(joint_point, end_point)
 
     # Change the values based on the provided signs
-    y = y * math.copysign(1, y_sign)
-    z = z * math.copysign(1, z_sign)
+    x = x * math.copysign(1, forward_signs[0])
+    y = y * math.copysign(1, forward_signs[1])
+    z = z * math.copysign(1, forward_signs[2])
 
     # Calculations for the forward angle
-    if is_y_first:
+    if fwd_y_first:
       forward = round(math.degrees(math.atan2(y, z)))
     else:
       forward = round(math.degrees(math.atan2(z, y)))
     forward += 360 if forward < 0 else 0
 
-    return forward
+    # Change the values based on the provided signs
+    x = x * math.copysign(1, lateral_signs[0])
+    y = y * math.copysign(1, lateral_signs[1])
+    z = z * math.copysign(1, lateral_signs[2])
+
+    # Calculations for the lateral angle
+    if lat_y_first:
+      lateral = round(math.degrees(math.atan2(y, x)))
+    else:
+      lateral = round(math.degrees(math.atan2(x, y)))
+    lateral += 360 if lateral < 0 else 0
+
+    return forward, lateral
 
 class PoseVisualizer:
   @staticmethod
-  def show_pose(image, image_landmarks, world_landmarks, screen_dims):
+  def show_pose(image, image_landmarks):
     mp_pose = mp.solutions.pose
     mp_drawing = mp.solutions.drawing_utils
 
     # Copy the image
     image_with_pose = image.copy()
-    screen_width, screen_height = screen_dims
 
     # Only show the pose on the image if the person is in the frame
     if image_landmarks:
