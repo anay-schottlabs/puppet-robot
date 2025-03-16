@@ -27,11 +27,11 @@ def publish_messages():
   publisher.connect(broker_ip=RASPBERRY_PI_IP_ADDRESS)
 
   while not kill_next_cycle:
-      # Have some delay so that we don't have an uncontrolled amount of messages
-      sleep(CYCLE_DELAY_SECONDS)
-      with lock:
-        # Send the servo pose over to the Raspberry Pi
-        publisher.publish_message(topic=TOPIC, message=servo_pose.to_sendable())
+    # Have some delay so that we don't have an uncontrolled amount of messages
+    sleep(CYCLE_DELAY_SECONDS)
+    with lock:
+      # Send the servo pose over to the Raspberry Pi
+      publisher.publish_message(topic=TOPIC, message=servo_pose.to_sendable())
   
   publisher.disconnect()
   print("Closing message publishing thread. The program will now exit.")
@@ -72,6 +72,10 @@ if __name__ == "__main__":
       if not lock.locked():
         # MAIN CALCULATIONS
         servo_pose.torso = PoseTracker.get_torso_rotation(world_landmarks=world_landmarks)
+
+        head_fwd, head_lat = PoseTracker.get_head_rotation(world_landmarks=world_landmarks, torso_rotation=servo_pose.torso)
+        servo_pose.head_fwd = head_fwd
+        servo_pose.head_lat = head_lat
 
         # This may seem weird (left is mapped to right, while right is mapped to left), but the handedness values seem to be inverted as of my testing
         is_left_hand_closed = PoseTracker.is_hand_grabbing(frame, "Right")

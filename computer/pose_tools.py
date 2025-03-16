@@ -62,6 +62,31 @@ class PoseTracker:
     x, y = PoseMath.get_relative_pos_2d(right_hip, left_hip)
     # This calculates the actual angle, with 0 degrees representing the person facing left
     return round(math.degrees(math.atan2(y, -x)) + 90)
+  
+  @staticmethod
+  def get_head_rotation(world_landmarks, torso_rotation):
+    mouth = [
+      world_landmarks.landmark[10].z,
+      world_landmarks.landmark[10].y
+    ]
+    eyebrow = [
+      world_landmarks.landmark[4].z,
+      world_landmarks.landmark[4].y
+    ]
+    forward_x, forward_y = PoseMath.get_relative_pos_2d(mouth, eyebrow)
+    forward = round((math.degrees(math.atan2(forward_y, forward_x)) - 70) * 10)
+
+    left_ear = [
+      world_landmarks.landmark[7].x,
+      world_landmarks.landmark[7].z
+    ]
+    right_ear = [
+      world_landmarks.landmark[8].x,
+      world_landmarks.landmark[8].z
+    ]
+    lateral_x, lateral_y = PoseMath.get_relative_pos_2d(right_ear, left_ear)
+    lateral = round(math.degrees(math.atan2(lateral_y, -lateral_x)) + 90) - torso_rotation + 90
+    return forward, lateral
 
 class PoseVisualizer:
   @staticmethod
