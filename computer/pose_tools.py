@@ -87,6 +87,38 @@ class PoseTracker:
     lateral_x, lateral_y = PoseMath.get_relative_pos_2d(right_ear, left_ear)
     lateral = round(math.degrees(math.atan2(lateral_y, -lateral_x)) + 90) - torso_rotation + 90
     return forward, lateral
+  
+  @staticmethod
+  def get_arm_joint_rotations(world_landmarks, landmark_index, y_sign=1, z_sign=1, is_y_first=True):
+    # This method gets the angles that a joint is rotated at
+    # There are two angles because the shoulder and elbow can rotate along two different axes
+
+    # First break up the landmarks into XYZ coordinates
+    joint_point = (
+      world_landmarks.landmark[landmark_index].x,
+      world_landmarks.landmark[landmark_index].y,
+      world_landmarks.landmark[landmark_index].z
+    )
+    end_point = (
+      world_landmarks.landmark[landmark_index + 2].x,
+      world_landmarks.landmark[landmark_index + 2].y,
+      world_landmarks.landmark[landmark_index + 2].z
+    )
+
+    x, y, z = PoseMath.get_relative_pos_3d(joint_point, end_point)
+
+    # Change the values based on the provided signs
+    y = y * math.copysign(1, y_sign)
+    z = z * math.copysign(1, z_sign)
+
+    # Calculations for the forward angle
+    if is_y_first:
+      forward = round(math.degrees(math.atan2(y, z)))
+    else:
+      forward = round(math.degrees(math.atan2(z, y)))
+    forward += 360 if forward < 0 else 0
+
+    return forward
 
 class PoseVisualizer:
   @staticmethod
@@ -102,23 +134,6 @@ class PoseVisualizer:
     if image_landmarks:
       # Draw the basic connections between landmarks
       mp_drawing.draw_landmarks(image_with_pose, image_landmarks, mp_pose.POSE_CONNECTIONS)
-      
-      # This loop goes over the joints of the landmarks of the shoulder and elbow for both arms
-      for i in range(11, 15):
-        # x and y position of the landmark
-        x = round(image_landmarks.landmark[i].x * screen_width)
-        y = round(image_landmarks.landmark[i].y * screen_height)
-
-        # Draw a circle around the landmark as a visual indicator that this will be sent to the robot
-        image_with_pose = cv2.circle(image_with_pose, (x, y), 10, (255, 0, 0), -1)
-        # Draw a rectangle next to the landmark to serve as a text box
-        image_with_pose = cv2.rectangle(image_with_pose, (x, y), (x + 80, y - 30), (255, 255, 255), -1)
-
-        # calculate the two angles of rotation for the joint
-        angleXY, angleZY = PoseMath.get_joint_angles(world_landmarks, i)
-        # add text to the text box that displays the calculated angles
-        image_with_pose = cv2.putText(image_with_pose, f"XY: {angleXY}", (x, y - 15), cv2.FONT_HERSHEY_PLAIN, 1, (0, 0, 0), 1)
-        image_with_pose = cv2.putText(image_with_pose, f"ZY: {angleZY}", (x, y), cv2.FONT_HERSHEY_PLAIN, 1, (0, 0, 0), 1)
     return image_with_pose
 
 class PoseMath:
@@ -141,29 +156,3 @@ class PoseMath:
     x = end_x - start_x
     y = end_y - start_y
     return -x, -y
-
-  @staticmethod
-  def get_joint_angles(world_landmarks, landmark_index):
-    # This method gets the angles that a joint is rotated at
-    # There are two angles because the shoulder and elbow can rotate along two different axes
-
-    # First break up the landmarks into XYZ coordinates
-    joint_point = (
-      world_landmarks.landmark[landmark_index].x,
-      world_landmarks.landmark[landmark_index].y,
-      world_landmarks.landmark[landmark_index].z
-    )
-    end_point = (
-      world_landmarks.landmark[landmark_index + 2].x,
-      world_landmarks.landmark[landmark_index + 2].y,
-      world_landmarks.landmark[landmark_index + 2].z
-    )
-
-    x, y, z = PoseMath.get_relative_pos_3d(joint_point, end_point)
-
-    # Solve for the angle on the XY plane
-    angleXY = round(math.degrees(math.atan2(y, x)))
-    # Solve for the angle on the ZY plane
-    angleZY = round(math.degrees(math.atan2(y, z)))
-
-    return angleXY, angleZY
