@@ -71,12 +71,23 @@ if __name__ == "__main__":
       # This is needed to ensure that there is no conflict between the main thread writing to the servo pose while the publish thread is reading from it
       if not lock.locked():
         # MAIN CALCULATIONS
+
+        # Torso
         servo_pose.torso = PoseTracker.get_torso_rotation(world_landmarks=world_landmarks)
 
+        # Head
         head_fwd, head_lat = PoseTracker.get_head_rotation(world_landmarks=world_landmarks, torso_rotation=servo_pose.torso)
         servo_pose.head_fwd = head_fwd
         servo_pose.head_lat = head_lat
 
+        # Shoulders
+        right_shoulder_fwd = PoseTracker.get_arm_joint_rotations(world_landmarks=world_landmarks, landmark_index=12, is_y_first=False)
+        servo_pose.right_shoulder_fwd = right_shoulder_fwd
+
+        left_shoulder_fwd = PoseTracker.get_arm_joint_rotations(world_landmarks=world_landmarks, landmark_index=11, y_sign=-1, z_sign=-1)
+        servo_pose.left_shoulder_fwd = left_shoulder_fwd
+        
+        # Hands
         # This may seem weird (left is mapped to right, while right is mapped to left), but the handedness values seem to be inverted as of my testing
         is_left_hand_closed = PoseTracker.is_hand_grabbing(frame, "Right")
         servo_pose.left_claw = ServoPose.CLAW_CLOSE_DEGREES if is_left_hand_closed else ServoPose.CLAW_OPEN_DEGREES
