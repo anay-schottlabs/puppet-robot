@@ -1,6 +1,8 @@
 import mediapipe as mp
 import cv2
 import math
+import numpy as np
+from scipy.spatial.transform import Rotation as R
 
 class PoseTracker:
   @staticmethod
@@ -60,51 +62,59 @@ class PoseTracker:
       world_landmarks.landmark[24].z
     ]
     x, y = PoseMath.get_relative_pos_2d(right_hip, left_hip)
-    # This calculates the actual angle, with 0 degrees representing the person facing left
-    return round(math.degrees(math.atan2(y, -x)) + 90)
+    # This calculates the actual angle, with 0 degrees representing the person facing right
+    result = round(math.degrees(math.atan2(y, x)))
+    return result + 360 if result < 0 else result
   
   @staticmethod
   def get_head_rotation(world_landmarks, torso_rotation):
     mouth = [
       world_landmarks.landmark[10].z,
-      world_landmarks.landmark[10].y
+      world_landmarks.landmark[10].y,
     ]
     eyebrow = [
       world_landmarks.landmark[4].z,
-      world_landmarks.landmark[4].y
+      world_landmarks.landmark[4].y,
     ]
     forward_x, forward_y = PoseMath.get_relative_pos_2d(mouth, eyebrow)
-    forward = round((math.degrees(math.atan2(forward_y, forward_x)) - 70) * 10)
+    forward = round(math.degrees(math.atan2(-forward_y, forward_x)) + 160)
 
-    left_ear = [
+    left_ear = PoseMath.cancel_torso_rotation([
       world_landmarks.landmark[7].x,
-      world_landmarks.landmark[7].z
-    ]
-    right_ear = [
+      world_landmarks.landmark[7].z,
+      0
+    ], torso_rotation)
+    right_ear = PoseMath.cancel_torso_rotation([
       world_landmarks.landmark[8].x,
-      world_landmarks.landmark[8].z
-    ]
-    lateral_x, lateral_y = PoseMath.get_relative_pos_2d(right_ear, left_ear)
-    lateral = round(math.degrees(math.atan2(lateral_y, -lateral_x)) + 90) - torso_rotation + 90
-    return forward, lateral
+      world_landmarks.landmark[8].z,
+      0
+    ], torso_rotation)
+    lateral_x, lateral_y = PoseMath.get_relative_pos_2d(right_ear[0::2], left_ear[0::2])
+    lateral = round(math.degrees(math.atan2(lateral_y, lateral_x)))
+    lateral = round((lateral + 360 if lateral < 0 else lateral) / 2)
+    return forward, lateral * 2
   
   @staticmethod
-  def get_arm_joint_rotations(world_landmarks, landmark_index, forward_signs, lateral_signs, fwd_y_first, lat_y_first):
+  def get_shoulder_rotations(world_landmarks, landmark_index, forward_signs, lateral_signs, fwd_y_first, lat_y_first, torso_rotation):
     # This method gets the angles that a joint is rotated at
-    # There are two angles because the shoulder and elbow can rotate along two different axes
+    # There are two angles because the shoulder can rotate along two different axes
 
-    # First break up the landmarks into XYZ coordinates
-    joint_point = (
+    multiplier = 100
+
+    # First break up the landmarks into XYZ coordinates, and make sure that they are not affected by the rotation of the torso
+    joint_point = PoseMath.cancel_torso_rotation([
       world_landmarks.landmark[landmark_index].x,
       world_landmarks.landmark[landmark_index].y,
       world_landmarks.landmark[landmark_index].z
-    )
-    end_point = (
+    ], torso_rotation)
+
+    end_point = PoseMath.cancel_torso_rotation([
       world_landmarks.landmark[landmark_index + 2].x,
       world_landmarks.landmark[landmark_index + 2].y,
       world_landmarks.landmark[landmark_index + 2].z
-    )
+    ], torso_rotation)
 
+    # Then get the relative position
     x, y, z = PoseMath.get_relative_pos_3d(joint_point, end_point)
 
     # Change the values based on the provided signs
@@ -114,9 +124,9 @@ class PoseTracker:
 
     # Calculations for the forward angle
     if fwd_y_first:
-      forward = round(math.degrees(math.atan2(y, z)))
+      forward = round(math.degrees(math.atan2(y, x)))
     else:
-      forward = round(math.degrees(math.atan2(z, y)))
+      forward = round(math.degrees(math.atan2(x, y)))
     forward += 360 if forward < 0 else 0
 
     # Change the values based on the provided signs
@@ -126,9 +136,9 @@ class PoseTracker:
 
     # Calculations for the lateral angle
     if lat_y_first:
-      lateral = round(math.degrees(math.atan2(y, x)))
+      lateral = round(math.degrees(math.atan2(y, z)))
     else:
-      lateral = round(math.degrees(math.atan2(x, y)))
+      lateral = round(math.degrees(math.atan2(z, y)))
     lateral += 360 if lateral < 0 else 0
 
     return forward, lateral
@@ -160,6 +170,7 @@ class PoseMath:
     z = end_z - start_z
     return -x, -y, -z
   
+  @staticmethod
   def get_relative_pos_2d(start_point, end_point):
     # Unpack the XY values from each of the points
     start_x, start_y = start_point
@@ -168,3 +179,10 @@ class PoseMath:
     x = end_x - start_x
     y = end_y - start_y
     return -x, -y
+  
+  @staticmethod
+  def cancel_torso_rotation(point, torso_rotation):
+    multiplier = 100
+    rotation = R.from_euler("y", torso_rotation / 2, degrees=True)
+    point_np = np.array(point) * multiplier
+    return np.round(rotation.apply(point_np))

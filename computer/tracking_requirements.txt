@@ -2,3 +2,5 @@ opencv-python==4.9.0.80
 mediapipe==0.10.10
 paho-mqtt==2.1.0
 python-dotenv==1.0.1
+scipy==1.12.0
+numpy==1.26.3
