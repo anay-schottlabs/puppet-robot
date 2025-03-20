@@ -7,17 +7,15 @@ Adafruit_PWMServoDriver pwm = Adafruit_PWMServoDriver();
 class Servo {
   public:
     int channel;
-    int maxDegrees;
     const static int SERVO_FREQ = 50;
 
-    Servo(int channelParam, int maxDegreesParam) {
+    Servo(int channelParam) {
       channel = channelParam;
-      maxDegrees = maxDegreesParam;
     }
 
     void setServoDegrees(int degrees) {
-      int constrainedDegrees = constrain(degrees, 0, maxDegrees);
-      int pulse = map(constrainedDegrees, 0, maxDegrees, Servo::PULSE_MIN, Servo::PULSE_MAX);
+      int constrainedDegrees = constrain(degrees, 0, Servo::MAX_DEGREES);
+      int pulse = map(constrainedDegrees, 0, Servo::MAX_DEGREES, Servo::PULSE_MIN, Servo::PULSE_MAX);
       pwm.writeMicroseconds(channel, pulse);
     }
   
@@ -25,24 +23,26 @@ class Servo {
     // These are measured in microseconds
     const static int PULSE_MIN = 600;
     const static int PULSE_MAX = 2400;
+
+    const static int MAX_DEGREES = 180;
 };
 
 const Servo SERVOS[] = {
-  Servo(0, 360), // RIGHT_SHOULDER_FWD
-  Servo(1, 360), // RIGHT_SHOULDER_LAT
-  Servo(2, 180), // RIGHT_ELBOW_FWD
-  Servo(3, 180), // RIGHT_ELBOW_LAT
-  Servo(4, 180), // RIGHT_WRIST
-  Servo(5, 180), // RIGHT_CLAW
-  Servo(6, 360), // LEFT_SHOULDER_FWD
-  Servo(7, 360), // LEFT_SHOULDER_LAT
-  Servo(8, 180), // LEFT_ELBOW_FWD
-  Servo(9, 180), // LEFT_ELBOW_LAT
-  Servo(10, 180), // LEFT_WRIST
-  Servo(11, 180), // LEFT_CLAW
-  Servo(12, 180), // HEAD_FWD
-  Servo(13, 180), // HEAD_LAT
-  Servo(14, 360) // TORSO
+  Servo(0), // RIGHT_SHOULDER_FWD
+  Servo(1), // RIGHT_SHOULDER_LAT
+  Servo(2), // RIGHT_ELBOW_FWD
+  Servo(3), // RIGHT_ELBOW_LAT
+  Servo(4), // RIGHT_WRIST
+  Servo(5), // RIGHT_CLAW
+  Servo(6), // LEFT_SHOULDER_FWD
+  Servo(7), // LEFT_SHOULDER_LAT
+  Servo(8), // LEFT_ELBOW_FWD
+  Servo(9), // LEFT_ELBOW_LAT
+  Servo(10), // LEFT_WRIST
+  Servo(11), // LEFT_CLAW
+  Servo(12), // HEAD_FWD
+  Servo(13), // HEAD_LAT
+  Servo(14) // TORSO
 };
 
 void setup() {
