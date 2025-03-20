@@ -8,7 +8,7 @@ from servo_data_format import TOPIC
 
 client = mqtt.Client()
 
-arduino = Serial("/dev/tty/AMA0", 115200)
+arduino = Serial("/dev/ttyACM0", 115200)
 
 def on_connect(client, userdata, flags, rc) -> None:
   # Handle broker connection failure
