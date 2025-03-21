@@ -64,7 +64,7 @@ class PoseTracker:
     x, y = PoseMath.get_relative_pos_2d(right_hip, left_hip)
     # This calculates the actual angle, with 0 degrees representing the person facing right
     result = round(math.degrees(math.atan2(y, x)))
-    return result + 360 if result < 0 else result
+    return round((result + 360 if result < 0 else result) / 2)
   
   @staticmethod
   def get_head_rotation(world_landmarks, torso_rotation):
@@ -95,53 +95,73 @@ class PoseTracker:
     return forward, lateral * 2
   
   @staticmethod
-  def get_shoulder_rotations(world_landmarks, landmark_index, forward_signs, lateral_signs, fwd_y_first, lat_y_first, torso_rotation):
-    # This method gets the angles that a joint is rotated at
+  def get_arm_rotations(world_landmarks, is_left_arm, torso_rotation):
+    # This method computes inverse kinematics for the entire arm
     # There are two angles because the shoulder can rotate along two different axes
 
-    multiplier = 100
+    # Determine what the landmark index of the wrist is based on if we are processing the left or right arm
+    if is_left_arm:
+      wrist_index = 15
+    else:
+      wrist_index = 16
 
-    # First break up the landmarks into XYZ coordinates, and make sure that they are not affected by the rotation of the torso
-    joint_point = PoseMath.cancel_torso_rotation([
-      world_landmarks.landmark[landmark_index].x,
-      world_landmarks.landmark[landmark_index].y,
-      world_landmarks.landmark[landmark_index].z
+    # Find the end effector position and make sure it's not affected by the torso rotation
+    wrist = PoseMath.cancel_torso_rotation([
+      world_landmarks.landmark[wrist_index].x,
+      world_landmarks.landmark[wrist_index].y,
+      world_landmarks.landmark[wrist_index].z
     ], torso_rotation)
 
-    end_point = PoseMath.cancel_torso_rotation([
-      world_landmarks.landmark[landmark_index + 2].x,
-      world_landmarks.landmark[landmark_index + 2].y,
-      world_landmarks.landmark[landmark_index + 2].z
+    # Find the end effector position and make sure it's not affected by the torso rotation
+    shoulder = PoseMath.cancel_torso_rotation([
+      world_landmarks.landmark[wrist_index - 4].x,
+      world_landmarks.landmark[wrist_index - 4].y,
+      world_landmarks.landmark[wrist_index - 4].z
     ], torso_rotation)
 
-    # Then get the relative position
-    x, y, z = PoseMath.get_relative_pos_3d(joint_point, end_point)
+    # Get the relative position of the wrist from the shoulder
+    x, y, z = PoseMath.get_relative_pos_3d(shoulder, wrist)
 
-    # Change the values based on the provided signs
-    x = x * math.copysign(1, forward_signs[0])
-    y = y * math.copysign(1, forward_signs[1])
-    z = z * math.copysign(1, forward_signs[2])
+    # The position is a vector, so we'll normalize it to make calculations simpler
+    end_pos = np.array([x, y, z])
+    norm = np.linalg.norm(end_pos)
+    end_pos = end_pos / norm
 
-    # Calculations for the forward angle
-    if fwd_y_first:
-      forward = round(math.degrees(math.atan2(y, x)))
+    x, y, z = end_pos
+
+    # Mirror the X coordinate for the left arm
+    if is_left_arm:
+      x = -x
+
+    # Inverse kinematics calculations
+    shoulder_lat = math.atan2(z, x) * (180 / math.pi)
+    l = math.sqrt(x * x + z * z)
+    h = math.sqrt(l * l + y * y)
+    phi = math.atan(y / l) * (180 / math.pi)
+    theta = math.acos((h / 2) / 0.5) * (180 / math.pi)
+
+    # Account for completely vertical positions
+    if l == 0:
+      shoulder_fwd = 0
+      elbow_fwd = 0
+      shoulder_lat = phi
     else:
-      forward = round(math.degrees(math.atan2(x, y)))
-    forward += 360 if forward < 0 else 0
+      shoulder_fwd = phi + theta
+      elbow_fwd = phi - theta
 
-    # Change the values based on the provided signs
-    x = x * math.copysign(1, lateral_signs[0])
-    y = y * math.copysign(1, lateral_signs[1])
-    z = z * math.copysign(1, lateral_signs[2])
+    shoulder_lat = 90 - shoulder_lat
 
-    # Calculations for the lateral angle
-    if lat_y_first:
-      lateral = round(math.degrees(math.atan2(y, z)))
-    else:
-      lateral = round(math.degrees(math.atan2(z, y)))
-    lateral += 360 if lateral < 0 else 0
+    # Adjust shoulder_fwd for 0 to 180 range
+    if shoulder_fwd < 0:
+      shoulder_fwd = 180 + shoulder_fwd
 
-    return forward, lateral
+    # More value tuning to account for the zero position of the left arm
+    if is_left_arm:
+      shoulder_lat = 180 - shoulder_lat
+      shoulder_fwd = -shoulder_fwd
+      elbow_fwd = 90 - elbow_fwd
+
+    return shoulder_fwd, shoulder_lat, min(elbow_fwd, 90) # Clamp elbow rotation to a max of 90 (due to physical robot limitations)
 
 class PoseVisualizer:
   @staticmethod

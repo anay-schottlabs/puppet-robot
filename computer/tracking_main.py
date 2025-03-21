@@ -81,24 +81,16 @@ if __name__ == "__main__":
           torso_rotation=servo_pose.torso
         )
 
-        # Shoulders
-        servo_pose.right_shoulder_fwd, servo_pose.right_shoulder_lat = PoseTracker.get_shoulder_rotations(
+        # Arm rotations
+        servo_pose.right_shoulder_fwd, servo_pose.right_shoulder_lat, servo_pose.right_elbow_fwd = PoseTracker.get_arm_rotations(
           world_landmarks=world_landmarks,
-          landmark_index=12,
-          forward_signs=(1, 1, 1),
-          lateral_signs=(1, -1, 1),
-          fwd_y_first=False,
-          lat_y_first=False,
+          is_left_arm=False,
           torso_rotation=servo_pose.torso
         )
 
-        servo_pose.left_shoulder_fwd, servo_pose.left_shoulder_lat = PoseTracker.get_shoulder_rotations(
+        servo_pose.left_shoulder_fwd, servo_pose.left_shoulder_lat, servo_pose.left_elbow_fwd = PoseTracker.get_arm_rotations(
           world_landmarks=world_landmarks,
-          landmark_index=11,
-          forward_signs=(1, -1, -1),
-          lateral_signs=(-1, -1, 1),
-          fwd_y_first=True,
-          lat_y_first=False,
+          is_left_arm=True,
           torso_rotation=servo_pose.torso
         )
         
@@ -121,7 +113,7 @@ if __name__ == "__main__":
         processed_frame = cv2.putText(processed_frame, text, (50, 50), cv2.FONT_HERSHEY_PLAIN, 2, (0, 0, 0), 2)
 
         # Finding the torso rotation
-        text = f"TORSO: {servo_pose.head_fwd}"
+        text = f"TORSO: {servo_pose.torso}"
         processed_frame = cv2.putText(processed_frame, text, (50, 100), cv2.FONT_HERSHEY_PLAIN, 2, (0, 0, 0), 2)
 
     # Display the current frame image after it has been processed
