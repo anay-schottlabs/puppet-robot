@@ -13,25 +13,40 @@ RASPBERRY_PI_IP_ADDRESS = os.getenv("RASPBERRY_PI_IP_ADDRESS")
 # This is a list of the servo values (angles in degrees)
 # They are all defaulted to zero at the start of the program
 DEFAULT_SERVO_LIST = [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ]
-servo_list = DEFAULT_SERVO_LIST
+servo_list = DEFAULT_SERVO_LIST.copy()
 
 publisher = MQTTPublisher()
 publisher.connect(broker_ip=RASPBERRY_PI_IP_ADDRESS)
 
-print("Your inputs will control the robot's right arm servos.\n")
+print("Your inputs will control the robot's servos.\n")
 
 # Each number represents an index in the list of servos
 servos = {
-  "RIGHT SHOULDER FORWARD": 0,
-  "LEFT SHOULDER FORWARD": 6,
+  "RIGHT SHOULDER FWD": 0,
+  "RIGHT SHOULDER LAT": 1,
+  "RIGHT ELBOW FWD": 2,
+  "RIGHT ELBOW LAT": 3,
+  "RIGHT WRIST": 4,
+  "RIGHT CLAW": 5,
+  "LEFT SHOULDER FWD": 6,
+  "LEFT SHOULDER LAT": 7,
+  "LEFT ELBOW FWD": 8,
+  "LEFT ELBOW LAT": 9,
+  "LEFT WRIST": 10,
+  "LEFT CLAW": 11,
+  "HEAD FWD": 12,
+  "HEAD LAT": 13,
   "TORSO": 14
 }
+
+pins = [ 0 ]
 
 was_zeros_sent = False
 
 while True:
   # Get the values for every servo that is being tested
-  for servo in servos.keys():
+  for pin in pins:
+    servo = list(servos.keys())[pin]
     while True:
       angle = input(f"{servo} (degrees): ")
 
@@ -53,7 +68,7 @@ while True:
         print("Value must be an integer.")
     
     if was_zeros_sent:
-      servo_list = DEFAULT_SERVO_LIST
+      servo_list = DEFAULT_SERVO_LIST.copy()
       was_zeros_sent = False
       break
   
